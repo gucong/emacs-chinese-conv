@@ -28,6 +28,13 @@
 
 ;;; Changelog:
 
+;; 2016/02/17
+;;     * Opencc backend data path now customizable through
+;;       `chinese-conv-opencc-data'
+;;
+;; 2015/02/26
+;;     * Opencc backend update for its JSON configuration files
+;;
 ;; 2013/02/13
 ;;     * New feature: multiple backend.
 ;;       Customizable through `chinese-conv-backend'.
@@ -51,21 +58,19 @@
   "opencc"
   "The opencc program path")
 
+(defvar chinese-conv-opencc-data
+  "/usr/share/opencc/"
+  "The data path for opencc")
+
 (defvar chinese-conv-opencc-alist
-  '(("simplified"  "/usr/share/opencc/mix2zhs.ini")
-    ("traditional" "/usr/share/opencc/mix2zht.ini")
-    ("from Simplified Chinese to Traditional Chinese" "/usr/share/opencc/zhs2zht.ini")
-    ("from Simplified to phrases of Taiwan" "/usr/share/opencc/zhs2zhtw_p.ini")
-    ("from Simplified to variants of Taiwan" "/usr/share/opencc/zhs2zhtw_v.ini")
-    ("from Simplified to variants and phrases of Taiwan" "/usr/share/opencc/zhs2zhtw_vp.ini")
-    ("Standard Configuration for Conversion from Traditional Chinese to Simplified Chinese" "/usr/share/opencc/zht2zhs.ini")
-    ("from Traditional to phrases of Taiwan" "/usr/share/opencc/zht2zhtw_p.ini")
-    ("from Traditional to variants of Taiwan" "/usr/share/opencc/zht2zhtw_v.ini")
-    ("from Traditional to variants and phrases of Taiwan" "/usr/share/opencc/zht2zhtw_vp.ini")
-    ("from Taiwan to China phrases (Simplified)" "/usr/share/opencc/zhtw2zhcn_s.ini")
-    ("from Taiwan to China phrases (Traditional)" "/usr/share/opencc/zhtw2zhcn_t.ini")
-    ("from Taiwan to Simplified" "/usr/share/opencc/zhtw2zhs.ini")
-    ("from Taiwan to Traditional" "/usr/share/opencc/zhtw2zht.ini"))
+  '(("traditional" "s2t.json")
+    ("simplified" "t2s.json")
+    ("Simplified Chinese to Traditional Chinese (Taiwan Standard)" "s2tw.json")
+    ("Traditional Chinese (Taiwan Standard) to Simplified Chinese" "tw2s.json")
+    ("Simplified Chinese to Traditional Chinese (Hong Kong Standard)" "s2hk.json")
+    ("Traditional Chinese (Hong Kong Standard) to Simplified Chinese" "hk2s.json")
+    ("Simplified Chinese to Traditional Chinese (Taiwan Standard) with Taiwanese idiom" "s2twp.json")
+    ("Traditional Chinese (Taiwan Standard) to Simplified Chinese with Mainland Chinese idiom" "tw2sp.json"))
   "Alist of opencc conversions.")
 
 (defun chinese-conv-opencc-command (conv)
@@ -73,7 +78,7 @@
     (if (null arg) (error "Undefined conversion")
       (concat chinese-conv-opencc-program
               " -i " chinese-conv-temp-path
-              " -c " arg))))
+              " -c " chinese-conv-opencc-data arg))))
 
 ;; cconv backend
 (defvar chinese-conv-cconv-program
