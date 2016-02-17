@@ -1,7 +1,11 @@
-;;; chinese-conv.el --- Chinese Conversion,
-;;; eg. between tradition and simplified forms
+;;; chinese-conv.el --- Conversion between Chinese Characters
+
+;; Copyright (C) 2012-2016 Cong Gu
 
 ;; Author: gucong <gucong43216@gmail.com>
+;; Version: 0.1.0
+;; Url: https://github.com/gucong/emacs-chinese-conv
+;; Package-Requires: ((cl-lib "0.5"))
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License,
@@ -25,6 +29,9 @@
 ;; Put this file into your load-path and the following into your
 ;; ~/.emacs:
 ;;   (require 'chinese-conv)
+
+;; Commands `chinese-conv' and `chinese-conv-replace' can be used
+;; interactively or non-interactively.
 
 ;;; Changelog:
 
@@ -51,16 +58,16 @@
 
 (defvar chinese-conv-temp-path
   "/tmp/chinese_conv.tmp"
-  "temp file for Chinese conversion")
+  "Temporary file for Chinese conversion.")
 
 ;; opencc backend
 (defvar chinese-conv-opencc-program
   "opencc"
-  "The opencc program path")
+  "The opencc program path.")
 
 (defvar chinese-conv-opencc-data
   "/usr/share/opencc/"
-  "The data path for opencc")
+  "The opencc data path.")
 
 (defvar chinese-conv-opencc-alist
   '(("traditional" "s2t.json")
@@ -74,6 +81,7 @@
   "Alist of opencc conversions.")
 
 (defun chinese-conv-opencc-command (conv)
+  "Generate the command for calling opencc.  CONV is one of the conversion types defined in `chinese-conv-opencc-alist'."
   (let ((arg (cadr (assoc conv chinese-conv-opencc-alist))))
     (if (null arg) (error "Undefined conversion")
       (concat chinese-conv-opencc-program
@@ -83,7 +91,7 @@
 ;; cconv backend
 (defvar chinese-conv-cconv-program
   "cconv"
-  "The cconv program path")
+  "The cconv program path.")
 
 (defvar chinese-conv-cconv-alist
   '(("simplified"  "UTF8-CN")
@@ -93,6 +101,7 @@
   "Alist of cconv conversions.")
 
 (defun chinese-conv-cconv-command (conv)
+  "Generate the command for calling cconv.  CONV is one of the conversion type identifiers in `chinese-conv-cconv-alist'."
   (let ((arg (cadr (assoc conv chinese-conv-cconv-alist))))
     (if (null arg) (error "Undefined conversion")
       (concat chinese-conv-cconv-program
@@ -100,23 +109,50 @@
               " " chinese-conv-temp-path))))
 
 ;; common
+(defvar chinese-conv-backend-alist
+  `(("opencc" ,chinese-conv-opencc-alist ,#'chinese-conv-opencc-command)
+    ("cconv" ,chinese-conv-cconv-alist ,#'chinese-conv-cconv-command))
+  "An alist to provide essential information about backends.
+
+Format is ((BACKEND CONVERSION-ALIST COMMAND-GENERATOR) ... ).
+
+CONVERSION-ALIST is in the format ((IDENTIFIER INFO ... ) ... ).
+The IDENTIFIER specifies a conversion direction and INFO provides
+information to be used by COMMAND-GENERATOR.  It is preferable to
+have \"simplified\" and \"traditional\" among the IDENTIFIERs.
+
+COMMAND-GENERATOR is a function that consumes a string to be
+matched with IDENTIFIER in CONVERSION-ALIST and produces a shell
+command in the form of a string.")
+
+(defvar chinese-conv-backend
+  "opencc"
+  "Backend of the conversion, see `chinese-conv-backend-alist'.")
+
 (defun chinese-conv-get-alist (&optional backend)
+  "Get conversion alist for the given BACKEND."
   (let ((l (cadr (assoc (or backend chinese-conv-backend)
                         chinese-conv-backend-alist))))
     (if (null l) (error "Undefined backend")
       l)))
 
 (defun chinese-conv-get-command (&optional backend)
-  (let ((f (caddr (assoc (or backend chinese-conv-backend)
-                         chinese-conv-backend-alist))))
+  "Get command generator for the given BACKEND."
+  (let ((f (cadr (cdr (assoc (or backend chinese-conv-backend)
+                         chinese-conv-backend-alist)))))
     (if (null f) (error "Undefined backend")
       f)))
 
 ;;;###autoload
 (defun chinese-conv (str conv &optional backend)
   "Convert a Chinese string, eg. between simplified and traditional forms.
+Can be used interactively or non-interactively.
+
 STR is the string to convert.
-BACKEND is the backend to be used, see `chinese-conv-backend-alist'."
+CONV is one of the conversion type identifiers.
+BACKEND is the backend to be used, see `chinese-conv-backend-alist'.
+
+Also see `chinese-conv-replace'."
   (interactive
    (let* ((guess (or (and transient-mark-mode mark-active
                         (buffer-substring-no-properties
@@ -140,7 +176,15 @@ BACKEND is the backend to be used, see `chinese-conv-backend-alist'."
 
 ;;;###autoload
 (defun chinese-conv-replace (start end conv &optional backend)
-  "Convert a Chinese string in place. See `chinese-con'."
+  "Convert a Chinese string in place.
+Can be used interactively or non-interactively.
+
+START is starting position in buffer.
+END is the ending position in buffer.
+CONV is one of the conversion type identifiers.
+BACKEND is the backend to be used, see `chinese-conv-backend-alist'.
+
+Also see `chinese-conv'."
   (interactive
    (let ((start (region-beginning))
          (end (region-end))
@@ -153,23 +197,7 @@ BACKEND is the backend to be used, see `chinese-conv-backend-alist'."
 
 ;; customization
 
-(defvar chinese-conv-backend-alist
-  `(("opencc" ,chinese-conv-opencc-alist ,#'chinese-conv-opencc-command)
-    ("cconv" ,chinese-conv-cconv-alist ,#'chinese-conv-cconv-command))
-  "An alist to provide essential information about backends in the format
- ((BACKEND CONVERSION-ALIST COMMAND-GENERATOR) ... )
-
-CONVERSION-ALIST is in the format ((IDENTIFIER INFO ... ) ... ).
-The IDENTIFIER specifies a conversion direction and INFO provides
-information to be used by COMMAND-GENERATOR.  It is preferable to
-have \"simplified\" and \"traditional\" among the IDENTIFIERs.
-
-COMMAND-GENERATOR is a function that consumes a string to be
-matched with IDENTIFIER in CONVERSION-ALIST and produces a shell
-command in the form of a string.")
-
-(defvar chinese-conv-backend
-  "opencc"
-  "Backend of the conversion, see `chinese-conv-backend-alist'.")
 
 (provide 'chinese-conv)
+
+;;; chinese-conv.el ends here
