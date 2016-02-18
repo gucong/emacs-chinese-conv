@@ -161,7 +161,7 @@ Also see `chinese-conv-replace'."
                    (current-word nil t)))
           (word (read-string (format "String to convert (default: %s): " guess)
                              nil nil guess))
-          (conv (completing-read "Converion: "
+          (conv (completing-read "Conversion: "
                                  (chinese-conv-get-alist) nil t)))
      (list word conv nil)))
   (with-temp-file chinese-conv-temp-path
