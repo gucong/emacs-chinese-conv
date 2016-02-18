@@ -1,4 +1,4 @@
-;;; chinese-conv.el --- Conversion between Chinese Characters
+;;; chinese-conv.el --- Conversion between Chinese Characters with opencc or cconv
 
 ;; Copyright (C) 2012-2016 Cong Gu
 
@@ -23,8 +23,9 @@
 
 ;;; Commentary:
 
-;; This file works with opencc (http://code.google.com/p/opencc/)
-;; and/or cconv (http://code.google.com/p/cconv)
+;; This file works with opencc (https://github.com/BYVoid/OpenCC)
+;; or cconv (https://github.com/xiaoyjy/cconv).  Customizable through
+;; `chinese-conv-backend'.
 
 ;; Put this file into your load-path and the following into your
 ;; ~/.emacs:
@@ -194,9 +195,6 @@ Also see `chinese-conv'."
   (let ((str (buffer-substring-no-properties start end)))
     (kill-region start end)
     (insert (chinese-conv str conv (or backend chinese-conv-backend)))))
-
-;; customization
-
 
 (provide 'chinese-conv)
 
