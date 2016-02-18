@@ -58,7 +58,7 @@
 ;;; Code:
 
 (defvar chinese-conv-temp-path
-  "/tmp/chinese_conv.tmp"
+  (concat temporary-file-directory "chinese_conv.tmp")
   "Temporary file for Chinese conversion.")
 
 ;; opencc backend
