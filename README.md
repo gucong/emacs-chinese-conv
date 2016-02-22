@@ -57,7 +57,7 @@ Set the backend to cconv,
 
 To change cconv program path, set `chinese-conv-cconv-program` (default: "cconv"),
 ```lisp
-(setq chinese-conv-opencc-program "/PATH/TO/BIN/cconv")
+(setq chinese-conv-cconv-program "/PATH/TO/BIN/cconv")
 ```
 
 ## Usage
@@ -68,10 +68,10 @@ Example:
 
 > `M-x` `chinese-conv` `RET` `后天` `RET` `traditional` `RET`
 
-`后天`: The string to convert.  The interactive command will guess it
+`后天` is the string to convert.  The interactive command will guess it
 from marked region or current word.
 
-`traditional`: The conversion type.  It is read with completion among all the
+`traditional` is the conversion type.  It is read with completion among all the
 available types.  Hit `TAB` for a complete list of available types.
 
 The result will be displayed in minibuffer.
@@ -91,7 +91,7 @@ The marked region will be converted to traditional characters.
 => "後天"
 ```
 
-Backend can be specified,
+Backend can be explicitly specified,
 ```lisp
 (chinese-conv "后天" "traditional" "opencc")
 => "後天"
